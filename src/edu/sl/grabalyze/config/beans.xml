@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+    <import resource="classpath:edu/sl/grabalyze/config/spring-database.xml"/>
+
+    <bean id="dateEditor"
+          class="org.springframework.beans.propertyeditors.CustomDateEditor">
+
+        <constructor-arg>
+            <bean class="java.text.SimpleDateFormat">
+                <constructor-arg value="yyyy-MM-dd" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg value="true" />
+
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+        <property name="customEditors">
+            <map>
+                <entry key="java.util.Date">
+                    <ref local="dateEditor" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+    
+    <bean id="articleDAO" class="edu.sl.grabalyze.dao.ArticleDAOImpl">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean id="gazetaUaListFactory" class="edu.sl.grabalyze.grabber.factory.GazetaUaListFactory">
+        <constructor-arg value="2013-04-06" />
+        <constructor-arg value="2013-04-07" />
+        <property name="articleDAO" ref="articleDAO" />
+    </bean>
+
+    <bean id="gazetaUaArticleFactory" class="edu.sl.grabalyze.grabber.factory.GazetaUaArticleFactory">
+        <constructor-arg value="500" />
+        <constructor-arg value="2013-12-31" />
+        <property name="articleDAO" ref="articleDAO" />
+    </bean>
+
+    <bean id="grabberFactory" class="edu.sl.grabalyze.grabber.factory.GrabberFactory">
+        <property name="strategies">
+            <bean factory-bean="gazetaUaArticleFactory" factory-method="createStrategies">
+                <constructor-arg value="8"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="loadController" class="edu.sl.grabalyze.main.LoadController" factory-method="get">
+        <property name="delay" value="200" />
+    </bean>
+
+    <bean id="harvester" class="edu.sl.grabalyze.main.GrabberExecutor">
+        <property name="grabbers">
+            <bean factory-bean="grabberFactory" factory-method="createGrabbers" />
+        </property>
+    </bean>
+
+
+
+</beans>
