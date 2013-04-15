@@ -40,7 +40,7 @@ public class GazetaUaArticleStrategy implements GrabberStrategy {
         String also = "ЧИТАЙТЕ ТАКОЖ";
         int index = html.indexOf(also);
         if (index != -1) {
-            return removeReadAlso(html.substring(0, index).concat(html.substring(html.indexOf("</p>", index), html.length())));
+            return removeReadAlso(html.substring(0, index).concat(html.substring(html.indexOf("</a>", index), html.length())));
         }
         return html;
     }

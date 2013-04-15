@@ -19,6 +19,7 @@ public class GrabberExecutor {
     public void execute() {
         if (grabbers.size() == 0)
             return;
+        System.out.println("Start executing.");
         long start = System.currentTimeMillis();
         ExecutorService executor = Executors.newFixedThreadPool(grabbers.size());
         for (Grabber grabber : grabbers) {

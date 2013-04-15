@@ -40,7 +40,7 @@
     </bean>
 
     <bean id="gazetaUaArticleFactory" class="edu.sl.grabalyze.grabber.factory.GazetaUaArticleFactory">
-        <constructor-arg value="500" />
+        <constructor-arg value="100" />
         <constructor-arg value="2013-12-31" />
         <property name="articleDAO" ref="articleDAO" />
     </bean>
@@ -48,7 +48,7 @@
     <bean id="grabberFactory" class="edu.sl.grabalyze.grabber.factory.GrabberFactory">
         <property name="strategies">
             <bean factory-bean="gazetaUaArticleFactory" factory-method="createStrategies">
-                <constructor-arg value="8"/>
+                <constructor-arg value="1"/>
             </bean>
         </property>
     </bean>
@@ -63,6 +63,7 @@
         </property>
     </bean>
 
-
+    <bean id="russianStemmer" class="edu.sl.processing.stemming.RussianStemmer">
+    </bean>
 
 </beans>

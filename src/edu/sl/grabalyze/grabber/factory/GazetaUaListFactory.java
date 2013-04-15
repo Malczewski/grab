@@ -25,6 +25,7 @@ public class GazetaUaListFactory implements GrabberStrategyFactory {
     }
 
     public List<GrabberStrategy> createStrategies(int count) {
+        System.out.println("Requesting for list urls.");
         List<GrabberStrategy> result = new ArrayList<>(count);
         if (dateFrom.after(dateTo)) {
             System.out.println("From date is after to date:" + dateFrom + " - " + dateTo);

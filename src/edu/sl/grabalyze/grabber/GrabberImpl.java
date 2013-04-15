@@ -26,30 +26,44 @@ public class GrabberImpl implements Grabber {
     }
 
     public void process() {
+        int errors = 0;
         while (strategy.hasUrl()) {
             LoadController.get().takeControl();
-            String html = requestHttp(strategy.nextUrl());
+            String urlInput = strategy.nextUrl();
             try {
-                strategy.processHtml(html);
-                System.out.println("Grabber #" + id + " : " + df.format(strategy.getProgress() * 100) + "%");
-            } catch (Exception ex) {
-                System.err.println("Error in :\n" + html);
-                System.err.println(ex);
+                String html = requestHttp(urlInput);
+                try {
+                    strategy.processHtml(html);
+                    System.out.println("Grabber #" + id + " : " + df.format(strategy.getProgress() * 100) + "%");
+                } catch (Exception ex) {
+                    System.err.println("Error in " + urlInput);
+                    System.err.println(ex);
+                    ex.printStackTrace();
+                    errors++;
+                }
+            } catch (Exception e) {
+                System.err.println("Error in :" + urlInput);
+                System.err.println(e);
+                errors++;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
-        System.out.println("Grabber #" + id + " : done!");
+        System.out.println("Grabber #" + id + " : done! (with " + errors + " errors)");
     }
 
-    private String requestHttp(String urlInput) {
+    private String requestHttp(String urlInput) throws IOException {
         //System.out.println("Processing " + urlInput);
         URL url;
         HttpURLConnection conn;
         BufferedReader rd;
         String line;
         String result = "";
-        try {
-            url = new URL(urlInput);
-            conn = (HttpURLConnection) url.openConnection();
+        url = new URL(urlInput);
+        conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             rd = new BufferedReader(
                     new InputStreamReader(conn.getInputStream(), "UTF8"));
@@ -57,10 +71,7 @@ public class GrabberImpl implements Grabber {
                 result += line;
             }
             rd.close();
-        } catch (Exception e) {
-            System.err.println(e);
-            e.printStackTrace();
-        }
+        
         return result;
     }
 }
