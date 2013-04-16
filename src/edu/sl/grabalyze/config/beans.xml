@@ -33,6 +33,10 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
 
+    <bean id="loadController" class="edu.sl.grabalyze.execution.LoadController" factory-method="get">
+        <property name="delay" value="200" />
+    </bean>
+
     <bean id="gazetaUaListFactory" class="edu.sl.grabalyze.grabber.factory.GazetaUaListFactory">
         <constructor-arg value="2013-04-06" />
         <constructor-arg value="2013-04-07" />
@@ -40,30 +44,19 @@
     </bean>
 
     <bean id="gazetaUaArticleFactory" class="edu.sl.grabalyze.grabber.factory.GazetaUaArticleFactory">
-        <constructor-arg value="100" />
+        <constructor-arg value="1000" />
         <constructor-arg value="2013-12-31" />
         <property name="articleDAO" ref="articleDAO" />
     </bean>
 
     <bean id="grabberFactory" class="edu.sl.grabalyze.grabber.factory.GrabberFactory">
-        <property name="strategies">
-            <bean factory-bean="gazetaUaArticleFactory" factory-method="createStrategies">
-                <constructor-arg value="1"/>
-            </bean>
-        </property>
+        <property name="strategyFactory" ref=gazetaUaArticleFactory />
     </bean>
 
-    <bean id="loadController" class="edu.sl.grabalyze.main.LoadController" factory-method="get">
-        <property name="delay" value="200" />
+    <bean id="harvester" class="edu.sl.grabalyze.execution.ProgramExecutor">
+        <property name="factory" ref="grabberFactory" />
+        <property name="threadCount" value="8" />
     </bean>
 
-    <bean id="harvester" class="edu.sl.grabalyze.main.GrabberExecutor">
-        <property name="grabbers">
-            <bean factory-bean="grabberFactory" factory-method="createGrabbers" />
-        </property>
-    </bean>
-
-    <bean id="russianStemmer" class="edu.sl.processing.stemming.RussianStemmer">
-    </bean>
 
 </beans>

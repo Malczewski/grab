@@ -1,6 +1,8 @@
-package edu.sl.grabalyze.processing.impl.stemming;
+package edu.sl.grabalyze.processing.stemming.impl;
 
 import java.util.Arrays;
+
+import edu.sl.grabalyze.processing.stemming.AbstractStemmer;
 
 public class RussianStemmer extends AbstractStemmer{
 

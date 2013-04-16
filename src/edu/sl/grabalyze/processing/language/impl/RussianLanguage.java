@@ -1,9 +1,9 @@
-package edu.sl.grabalyze.processing.impl;
+package edu.sl.grabalyze.processing.language.impl;
 
-import edu.sl.grabalyze.processing.Language;
-import edu.sl.grabalyze.processing.Stemmer;
-import edu.sl.grabalyze.processing.StopWords;
-import edu.sl.grabalyze.processing.impl.stemming.RussianStemmer;
+import edu.sl.grabalyze.processing.language.Language;
+import edu.sl.grabalyze.processing.stemming.Stemmer;
+import edu.sl.grabalyze.processing.stemming.impl.RussianStemmer;
+import edu.sl.grabalyze.processing.stopwords.StopWords;
 
 
 

@@ -1,4 +1,4 @@
-package edu.sl.grabalyze.processing;
+package edu.sl.grabalyze.processing.stopwords;
 
 import java.util.Enumeration;
 import java.util.HashSet;

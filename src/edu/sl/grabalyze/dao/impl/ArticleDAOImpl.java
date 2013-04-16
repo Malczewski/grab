@@ -1,6 +1,7 @@
-package edu.sl.grabalyze.dao;
+package edu.sl.grabalyze.dao.impl;
 
 
+import edu.sl.grabalyze.dao.ArticleDAO;
 import edu.sl.grabalyze.entity.Article;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
@@ -13,21 +14,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public class ArticleDAOImpl implements ArticleDAO {
-
-    private DataSource dataSource;
-
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    private JdbcTemplate getJdbcTemplate() {
-        return new JdbcTemplate(dataSource);
-    }
+public class ArticleDAOImpl extends AbstractDAO implements ArticleDAO {
 
     @Override
     public void batchInsert(List<Article> list) {
-        getJdbcTemplate().batchUpdate("INSERT INTO articles (id, url, title, category_code, category_name, content, doc_date)" +
+        getJdbcTemplate().batchUpdate("INSERT INTO articles (article_id, url, title, category_code, category_name, content, doc_date)" +
                 " values (?,?,?,?,?,?,?)",list, 1000, new ParameterizedPreparedStatementSetter<Article>(){
             @Override
             public void setValues(PreparedStatement preparedStatement, Article article) throws SQLException {
@@ -41,26 +32,21 @@ public class ArticleDAOImpl implements ArticleDAO {
             }
         });
     }
-
-    @Override
-    public void batchUpdate(List<Article> list) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
     
     @Override
     public void updateContent(long id, String text) {
-        getJdbcTemplate().update("UPDATE articles SET content = ? WHERE id = ?", text, id);
+        getJdbcTemplate().update("UPDATE articles SET content = ? WHERE article_id = ?", text, id);
     }
 
     @Override
-    public List<Article> getArticles() {
-        return getJdbcTemplate().query("SELECT id, url, title, category_code, category_name, content, doc_date FROM articles",
-                new ArticleMapper());
+    public List<Article> getArticles(int count) {
+        return getJdbcTemplate().query("SELECT article_id, url, title, category_code, category_name, content, doc_date FROM articles" +
+        		" ORDER BY doc_date desc LIMIT ?", new Object[] {count}, new ArticleMapper());
     }
 
     @Override
     public List<Article> getNotProcessedArticles(int count, java.util.Date beforeDate) {
-        return getJdbcTemplate().query("SELECT id, url, title, category_code, category_name, content, doc_date FROM articles" +
+        return getJdbcTemplate().query("SELECT article_id, url, title, category_code, category_name, content, doc_date FROM articles" +
                 " WHERE content is null and doc_date < ? ORDER BY doc_date desc LIMIT ?", new Object[] { beforeDate, count },
                 new ArticleMapper());
     }

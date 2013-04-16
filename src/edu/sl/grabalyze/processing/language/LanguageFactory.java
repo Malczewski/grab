@@ -1,6 +1,6 @@
-package edu.sl.grabalyze.processing;
+package edu.sl.grabalyze.processing.language;
 
-import edu.sl.grabalyze.processing.impl.*;
+import edu.sl.grabalyze.processing.language.impl.*;
 
 public class LanguageFactory {
 

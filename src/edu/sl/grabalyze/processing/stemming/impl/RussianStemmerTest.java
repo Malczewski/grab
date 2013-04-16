@@ -1,9 +1,10 @@
-package edu.sl.grabalyze.processing.impl.stemming;
+package edu.sl.grabalyze.processing.stemming.impl;
 
 import junit.framework.TestCase;
 import org.junit.Test;
 
-import edu.sl.grabalyze.processing.Stemmer;
+import edu.sl.grabalyze.processing.stemming.Stemmer;
+
 
 /**
  * User: YM

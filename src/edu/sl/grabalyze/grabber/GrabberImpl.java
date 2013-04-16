@@ -1,7 +1,7 @@
 package edu.sl.grabalyze.grabber;
 
+import edu.sl.grabalyze.execution.LoadController;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
-import edu.sl.grabalyze.main.LoadController;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
 
-public class GrabberImpl implements Grabber {
+public class GrabberImpl implements Runnable {
 
     private GrabberStrategy strategy;
     private int id;
@@ -25,7 +25,7 @@ public class GrabberImpl implements Grabber {
         this.id = id;
     }
 
-    public void process() {
+    public void run() {
         int errors = 0;
         while (strategy.hasUrl()) {
             LoadController.get().takeControl();

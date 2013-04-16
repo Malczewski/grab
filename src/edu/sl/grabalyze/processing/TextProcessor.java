@@ -3,6 +3,8 @@ package edu.sl.grabalyze.processing;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.sl.grabalyze.processing.language.Language;
+
 public class TextProcessor {
 
     private Language language;
@@ -32,7 +34,7 @@ public class TextProcessor {
             if (language.getStopWords().isStopWord(word))
                 continue;
             stemWord = language.getStemmer().stem(word).replace("\"", "").replace("'", "");
-            result.put(stemWord, 1 + (result.containsKey(stemWord) ? result.get(stemWord) : 0)); 
+            result.put(stemWord, 1 + (result.containsKey(stemWord) ? result.get(stemWord) : 0));
         }
         return result;
     }
