@@ -29,9 +29,15 @@
         </property>
     </bean>
     
-    <bean id="articleDAO" class="edu.sl.grabalyze.dao.ArticleDAOImpl">
+    <bean id="articleDAO" class="edu.sl.grabalyze.dao.impl.ArticleDAOImpl">
         <property name="dataSource" ref="dataSource" />
     </bean>
+
+    <bean id="tokenDAO" class="edu.sl.grabalyze.dao.impl.TokenDAOImpl">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- ********** GRAB *********** -->
 
     <bean id="loadController" class="edu.sl.grabalyze.execution.LoadController" factory-method="get">
         <property name="delay" value="200" />
@@ -45,17 +51,42 @@
 
     <bean id="gazetaUaArticleFactory" class="edu.sl.grabalyze.grabber.factory.GazetaUaArticleFactory">
         <constructor-arg value="1000" />
-        <constructor-arg value="2013-12-31" />
+        <constructor-arg value="0" />
         <property name="articleDAO" ref="articleDAO" />
     </bean>
 
     <bean id="grabberFactory" class="edu.sl.grabalyze.grabber.factory.GrabberFactory">
-        <property name="strategyFactory" ref=gazetaUaArticleFactory />
+        <property name="strategyFactory" ref="gazetaUaArticleFactory" />
     </bean>
 
-    <bean id="harvester" class="edu.sl.grabalyze.execution.ProgramExecutor">
-        <property name="factory" ref="grabberFactory" />
-        <property name="threadCount" value="8" />
+    <!-- ********** PROCESSING *********** -->
+
+    <bean id="russianProcessor" class="edu.sl.grabalyze.processing.TextProcessor">
+        <constructor-arg>
+            <bean class="edu.sl.grabalyze.processing.language.LanguageFactory" factory-method="createLanguage">
+                <constructor-arg value="ru" />
+            </bean>
+        </constructor-arg>
+    </bean>
+    <bean id="ukrainianProcessor" class="edu.sl.grabalyze.processing.TextProcessor">
+        <constructor-arg>
+            <bean class="edu.sl.grabalyze.processing.language.LanguageFactory" factory-method="createLanguage">
+                <constructor-arg value="uk" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="processingFactory" class="edu.sl.grabalyze.processing.factory.ProcessingFactory">
+        <property name="articleDAO" ref="articleDAO" />
+        <property name="tokenDAO" ref="tokenDAO" />
+        <property name="textProcessor" ref="ukrainianProcessor" />
+        <property name="countPerWorker" value="1" />
+        <property name="offset" value="0" />
+    </bean>
+
+    <bean id="program" class="edu.sl.grabalyze.execution.ProgramExecutor">
+        <property name="factory" ref="processingFactory" />
+        <property name="threadCount" value="1" />
     </bean>
 
 

@@ -39,15 +39,15 @@ public class ArticleDAOImpl extends AbstractDAO implements ArticleDAO {
     }
 
     @Override
-    public List<Article> getArticles(int count) {
+    public List<Article> getArticles(int count, int offset) {
         return getJdbcTemplate().query("SELECT article_id, url, title, category_code, category_name, content, doc_date FROM articles" +
-        		" ORDER BY doc_date desc LIMIT ?", new Object[] {count}, new ArticleMapper());
+        		" ORDER BY doc_date desc LIMIT ? OFFSET ?", new Object[] { count, offset }, new ArticleMapper());
     }
 
     @Override
-    public List<Article> getNotProcessedArticles(int count, java.util.Date beforeDate) {
+    public List<Article> getNotProcessedArticles(int count, int offset) {
         return getJdbcTemplate().query("SELECT article_id, url, title, category_code, category_name, content, doc_date FROM articles" +
-                " WHERE content is null and doc_date < ? ORDER BY doc_date desc LIMIT ?", new Object[] { beforeDate, count },
+                " WHERE content is null ORDER BY doc_date desc LIMIT ? OFFSET ?", new Object[] { count, offset },
                 new ArticleMapper());
     }
 

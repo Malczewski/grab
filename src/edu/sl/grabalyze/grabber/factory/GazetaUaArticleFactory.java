@@ -12,11 +12,11 @@ public class GazetaUaArticleFactory implements GrabberStrategyFactory {
 
     private ArticleDAO articleDAO;
     private int countPerWorker;
-    private Date beforeDate;
+    private int offset;
 
-    public GazetaUaArticleFactory(int countPerWorker, Date beforeDate) {
+    public GazetaUaArticleFactory(int countPerWorker, int offset) {
         this.countPerWorker = countPerWorker;
-        this.beforeDate = beforeDate;
+        this.offset = offset;
     }
 
     public void setArticleDAO(ArticleDAO articleDAO) {
@@ -26,7 +26,7 @@ public class GazetaUaArticleFactory implements GrabberStrategyFactory {
     public List<GrabberStrategy> createStrategies(int count) {
         System.out.println("Requesting for article urls");
         List<GrabberStrategy> result = new ArrayList<>(count);
-        List<Article> articles = articleDAO.getNotProcessedArticles(count * countPerWorker, beforeDate);
+        List<Article> articles = articleDAO.getNotProcessedArticles(count * countPerWorker, offset);
         for (int i = 0; i < count; i++) {
             HashMap<Long, String> map = new HashMap<>(countPerWorker);
             for (int j = 0; j < countPerWorker && j + i * countPerWorker < articles.size(); j++) {
@@ -37,8 +37,9 @@ public class GazetaUaArticleFactory implements GrabberStrategyFactory {
             strategy.setArticleDAO(articleDAO);
             result.add(strategy);
         }
-        System.out.println("Got " + articles.size() + " articles for " + count + " workers. "
-                + "Dates:" + articles.get(0).getDate() + " to " + articles.get(articles.size()-1).getDate());
+        System.out.println("Got " + articles.size() + " articles for " + count + " workers.");
+        if (articles.size() > 0)
+            System.out.println("Dates:" + articles.get(0).getDate() + " to " + articles.get(articles.size()-1).getDate());
         return result;
     }
 }

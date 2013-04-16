@@ -1,6 +1,7 @@
 package edu.sl.grabalyze.processing;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import edu.sl.grabalyze.processing.language.Language;
@@ -19,11 +20,11 @@ public class TextProcessor {
      * @return each unique word and its frequency
      */
     public Map<String, Integer> processText(String text) {
-        Map<String, Integer> result = new HashMap<String, Integer>();
+        Map<String, Integer> result = new LinkedHashMap<String, Integer>();
         String text1 = text.replace(',',' ').replace('.', ' ').replace(':', ' ')
                 .replace(';',' ').replace('?', ' ').replace('!', ' ')
                 .replace('[',' ').replace(']', ' ').replace('(', ' ')
-                .replace(')',' ');
+                .replace(')',' ').replace('-',' ');
         String[] words = text1.split("\\s+");
         String word;
         String stemWord;

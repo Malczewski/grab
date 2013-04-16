@@ -16,6 +16,7 @@ create index on tokens(word);
 create table article_tokens (
     article_id integer references articles(article_id),
     token_id integer references tokens(token_id),
-    token_count integer);
+    token_count integer,
+    primary key (article_id, token_id));
 create index on article_tokens(article_id);
 create index on article_tokens(token_id);

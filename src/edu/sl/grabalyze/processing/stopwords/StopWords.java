@@ -1,17 +1,23 @@
 package edu.sl.grabalyze.processing.stopwords;
 
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 public class StopWords {
 
     private Set<String> words;
     
     public StopWords(String langTag) {
-        ResourceBundle bundle = ResourceBundle.getBundle("edu.sl.grabalyze.processing.impl.stopwords.StopWordsBundle",Locale.forLanguageTag(langTag));
+        //ResourceBundle bundle = ResourceBundle.getBundle(
+        //        "edu.sl.grabalyze.processing.stopwords.StopWordsBundle",Locale.forLanguageTag(langTag));
+        ResourceBundle bundle = null;
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(
+                    getClass().getResourceAsStream("StopWordsBundle_" + langTag + ".properties"), "Windows-1251"));
+            bundle = new PropertyResourceBundle(reader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         words = new HashSet<String>(100);
         Enumeration<String> en = bundle.getKeys();
         while (en.hasMoreElements())

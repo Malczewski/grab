@@ -12,6 +12,6 @@ public interface ArticleDAO {
     
     void updateContent(long id, String text);
 
-    List<Article> getArticles(int count);
-    List<Article> getNotProcessedArticles(int count, Date beforeDate);
+    List<Article> getArticles(int count, int offset);
+    List<Article> getNotProcessedArticles(int count, int offset);
 }

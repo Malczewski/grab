@@ -43,7 +43,6 @@ public class RussianStemmerTest extends TestCase {
         assertEquals(words.length,stemms.length);
         String stem;
         for (int i = 0; i < words.length; i++) {
-            System.out.println(words[i]);
             stem = stemmer.stem(words[i]);
             assertEquals("stem(" + words[i] + ") should be equal to " + stemms[i] + ", not " + stem + "!",
                     stem, stemms[i]);

@@ -15,12 +15,17 @@ import edu.sl.grabalyze.processing.TextProcessor;
 public class ProcessingFactory implements RunnableFactory {
 
     private int countPerWorker;
+    private int offset;
     private ArticleDAO articleDAO;
     private TokenDAO tokenDAO;
     private TextProcessor textProcessor;
 
     public void setCountPerWorker(int count) {
         this.countPerWorker = count;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
     }
 
     public void setArticleDAO(ArticleDAO dao) {
@@ -37,7 +42,7 @@ public class ProcessingFactory implements RunnableFactory {
 
     @Override
     public List<Runnable> create(int count) {
-        List<Article> articles = articleDAO.getArticles(count * countPerWorker);
+        List<Article> articles = MockList.createArticles();//articleDAO.getArticles(count * countPerWorker, offset);
 
         List<Runnable> result = new ArrayList<Runnable>(count);
         for (int i = 0; i < count; i++) {
@@ -49,9 +54,9 @@ public class ProcessingFactory implements RunnableFactory {
             if (start >= articles.size())
                 break;
             proc.setArticles(articles.subList(start, end));
+            result.add(proc);
             if (end >= articles.size())
                 break;
-            result.add(proc);
         }
         
         return result;

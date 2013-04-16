@@ -13,7 +13,7 @@ public class ProcessorImpl implements Runnable{
     private TextProcessor processor;
     private int id;
     
-    private Map<Long, Map<String,Integer>> wordMapping = new HashMap<Long, Map<String,Integer>>(articles.size());
+    private Map<Long, Map<String,Integer>> wordMapping = new HashMap<Long, Map<String,Integer>>(1000);
 
     private final DecimalFormat df = new DecimalFormat("#.##");
 
