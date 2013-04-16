@@ -1,4 +1,4 @@
-package edu.sl.grabalyze.processing.stemming;
+package edu.sl.grabalyze.processing;
 
 public interface Stemmer {
     String stem(String word);

@@ -1,6 +1,8 @@
-package edu.sl.grabalyze.processing.stemming;
+package edu.sl.grabalyze.processing.impl.stemming;
 
 import java.util.Arrays;
+
+import edu.sl.grabalyze.processing.Stemmer;
 
 /**
  * http://snowball.tartarus.org/algorithms/russian/stemmer.html
