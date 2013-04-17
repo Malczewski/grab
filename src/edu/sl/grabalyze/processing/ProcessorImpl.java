@@ -36,10 +36,11 @@ public class ProcessorImpl implements Runnable{
     public void run() {
         int count = 0;
         for (Article a : articles) {
-            System.out.println("Processor #" + id + " : " + df.format(100.0 * count++ / articles.size()) + "%");
+            if (count % 10 == 0)
+                System.out.println("Processor #" + id + " : " + df.format(100.0 * count++ / articles.size()) + "%");
             wordMapping.put(a.getId(), processor.processText(a.getText()));
         }
-        System.out.println("Grabber #" + id + " : done!");
+        System.out.println("Processor #" + id + " : done!");
     }
 
     

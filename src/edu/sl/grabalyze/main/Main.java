@@ -4,8 +4,7 @@ import edu.sl.grabalyze.execution.ProgramExecutor;
 import edu.sl.grabalyze.processing.TextProcessor;
 import edu.sl.grabalyze.processing.factory.ProcessingFactory;
 import edu.sl.grabalyze.processing.language.impl.UkrainianLanguage;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 
 
 import java.io.IOException;
