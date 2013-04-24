@@ -1,10 +1,13 @@
-package edu.sl.grabalyze.grabber.strategy;
+package edu.sl.grabalyze.grabber.strategy.telegraf;
 
 import edu.sl.grabalyze.dao.ArticleDAO;
+import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-public class GazetaUaArticleStrategy implements GrabberStrategy {
+public class TelegrafArticleStrategy implements GrabberStrategy {
 
     private Map<Long, String> urls;
     private Iterator<Long> iterator;
@@ -12,7 +15,7 @@ public class GazetaUaArticleStrategy implements GrabberStrategy {
     private int counter;
     private ArticleDAO articleDAO;
 
-    public GazetaUaArticleStrategy(Map<Long, String> urls) {
+    public TelegrafArticleStrategy(Map<Long, String> urls) {
         this.urls = new HashMap<Long, String>(urls);
         iterator = this.urls.keySet().iterator();
         counter = 0;

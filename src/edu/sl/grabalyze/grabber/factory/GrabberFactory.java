@@ -10,15 +10,15 @@ import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
 
 public class GrabberFactory implements RunnableFactory {
 
-    GrabberStrategyFactory strategyFactory;
+    GrabberStrategies strategies;
 
-    public void setStrategyFactory(GrabberStrategyFactory strategyFactory) {
-        this.strategyFactory = strategyFactory;
+    public void setStrategies(GrabberStrategies strategies) {
+        this.strategies = strategies;
     }
 
     @Override
     public List<Runnable> create(int count) {
-        List<GrabberStrategy> strategies = strategyFactory.createStrategies(count);
+        List<GrabberStrategy> strategies = this.strategies.createStrategies(count);
         List<Runnable> result = new ArrayList<>(strategies.size());
         int id = 0;
         for (GrabberStrategy strategy : strategies) {

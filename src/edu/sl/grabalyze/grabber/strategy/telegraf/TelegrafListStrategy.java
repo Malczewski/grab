@@ -1,28 +1,28 @@
-package edu.sl.grabalyze.grabber.strategy;
+package edu.sl.grabalyze.grabber.strategy.telegraf;
 
 import edu.sl.grabalyze.dao.ArticleDAO;
 import edu.sl.grabalyze.entity.Article;
+import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GazetaUaListStrategy implements GrabberStrategy {
+public class TelegrafListStrategy implements GrabberStrategy {
 
-    private static final String HOST = "http://www.gazeta.ua";
-    private static final String NEWS_LINK = HOST + "/news/%s/any/%d";
+    private static final String HOST = "http://telegraf.com.ua";
+    private static final String NEWS_LINK = HOST + "/date/%s/page/%d/";
 
-    private static final String CONTENT_END = "<a href=\"/news/%s/any/2\">Наступна";
-    private static final String CONTENT_EXIST = "class=\"list-item\"";
-    private static final String START_STRING = "list-item-top-border";
-    private static final String END_STRING = "pagination";
+    private static final String CONTENT_EXIST = "divh5";
+    private static final String START_STRING = "titleBlockForNews";
+    private static final String END_STRING = "page-numbers current";
 
-    private static final String LIST_ITEM = "list-preview";
+    private static final String LIST_ITEM = "categoryLatestNewsTextHeight";
 
     private static final long DAY = 1000 * 60 * 60 * 24;
 
-    private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat format = new SimpleDateFormat("yyyy/M/d");
 
     private Date dateTo, dateFrom, startDate;
     private int page;
@@ -30,7 +30,7 @@ public class GazetaUaListStrategy implements GrabberStrategy {
 
     private ArticleDAO articleDAO;
 
-    public GazetaUaListStrategy(Date from, Date to) {
+    public TelegrafListStrategy(Date from, Date to) {
         this.dateFrom = new Date(from.getTime());
         this.startDate = new Date(from.getTime());
         this.dateTo = new Date(to.getTime());
@@ -51,16 +51,15 @@ public class GazetaUaListStrategy implements GrabberStrategy {
             pageCount = -1;
             return;
         }
-        String content = html.substring(html.indexOf(START_STRING), html.indexOf("ui.datepicker-uk.js"));
+        String content = html.substring(html.indexOf(START_STRING), html.indexOf(END_STRING));
         if (pageCount == -1) {
             if (!html.contains(END_STRING)) {
                 pageCount = 1;
             } else {
-                content = html.substring(0, html.indexOf(String.format(CONTENT_END, getDate())));
-                int last = content.lastIndexOf("</a>");
-                String countStr = content.substring(content.indexOf('>', last - 5) + 1, last);
+                Extractor extractor = new Extractor();
+                extractor.setString("Страница 1 из ", "</span>");
+                String countStr = extractValue(content, extractor);
                 pageCount = Integer.valueOf(countStr);
-                content = content.substring(0, content.indexOf(END_STRING));
             }
         }
 
@@ -75,17 +74,16 @@ public class GazetaUaListStrategy implements GrabberStrategy {
             Article art = new Article();
 
             ex.setString("<a href=\"", "\">");
-            art.setUrl(HOST + extractValue(content, ex));
-            art.setCategoryCode(art.getUrl().replaceAll(".*articles/", "").replaceAll("/.*", ""));
+            art.setUrl(extractValue(content, ex));
 
-            art.setId(Long.valueOf(art.getUrl().substring(art.getUrl().lastIndexOf('/') + 1)));
-
-            ex.setString("class=\"marked\">", "</a>");
-            art.setCategoryName(extractValue(content, ex));
-
-            ex.setString(art.getId() + "\">", "</a>");
+            ex.setString("<div class=\"divh5\">", "</div>");
             art.setTitle(extractValue(content, ex));
 
+            ex.setString("class=\"addToRead\" id=\"", "\" title");
+            art.setId(Long.valueOf(extractValue(content, ex)));
+
+            art.setCategoryCode(art.getUrl().replaceAll(HOST + "/", "")
+                    .replaceAll("/" + art.getId() + ".*", ""));
 
             art.setDate(dateFrom);
 
@@ -119,10 +117,6 @@ public class GazetaUaListStrategy implements GrabberStrategy {
     @Override
     public boolean hasUrl() {
         return dateFrom.before(dateTo) || dateFrom.equals(dateTo) && (page <= pageCount || pageCount == -1);
-    }
-
-    private String getDate() {
-        return format.format(dateFrom);
     }
 
     private String getUrl() {

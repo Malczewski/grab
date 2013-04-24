@@ -2,19 +2,18 @@ package edu.sl.grabalyze.grabber.factory;
 
 import edu.sl.grabalyze.dao.ArticleDAO;
 import edu.sl.grabalyze.entity.Article;
-import edu.sl.grabalyze.grabber.strategy.GazetaUaArticleStrategy;
-import edu.sl.grabalyze.grabber.strategy.GazetaUaListStrategy;
+import edu.sl.grabalyze.grabber.strategy.gazetaua.GazetaUaArticleStrategy;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
 
 import java.util.*;
 
-public class GazetaUaArticleFactory implements GrabberStrategyFactory {
+public class ArticleItemFactory extends GrabberStrategies {
 
     private ArticleDAO articleDAO;
     private int countPerWorker;
     private int offset;
 
-    public GazetaUaArticleFactory(int countPerWorker, int offset) {
+    public ArticleItemFactory(int countPerWorker, int offset) {
         this.countPerWorker = countPerWorker;
         this.offset = offset;
     }
@@ -33,8 +32,7 @@ public class GazetaUaArticleFactory implements GrabberStrategyFactory {
                 Article a = articles.get(j + i * countPerWorker);
                 map.put(a.getId(), a.getUrl());
             }
-            GazetaUaArticleStrategy strategy = new GazetaUaArticleStrategy(map);
-            strategy.setArticleDAO(articleDAO);
+            GrabberStrategy strategy = getStrategyFactory().createItemStrategy(map);
             result.add(strategy);
         }
         System.out.println("Got " + articles.size() + " articles for " + count + " workers.");

@@ -43,20 +43,27 @@
         <property name="delay" value="200" />
     </bean>
 
-    <bean id="gazetaUaListFactory" class="edu.sl.grabalyze.grabber.factory.GazetaUaListFactory">
-        <constructor-arg value="2013-04-06" />
-        <constructor-arg value="2013-04-07" />
-        <property name="articleDAO" ref="articleDAO" />
+    <bean id="grabberType" class="edu.sl.grabalyze.grabber.strategy.GrabberStrategyFactory"
+          factory-method="createFactory">
+        <constructor-arg value="telegraf" />
+        <constructor-arg ref="articleDAO" />
     </bean>
 
-    <bean id="gazetaUaArticleFactory" class="edu.sl.grabalyze.grabber.factory.GazetaUaArticleFactory">
-        <constructor-arg value="1000" />
+    <bean id="articleListFactory" class="edu.sl.grabalyze.grabber.factory.ArticleListFactory">
+        <constructor-arg value="2013-04-06" />
+        <constructor-arg value="2013-04-07" />
+        <property name="strategyFactory" ref="grabberType" />
+    </bean>
+
+    <bean id="articleItemFactory" class="edu.sl.grabalyze.grabber.factory.ArticleItemFactory">
+        <constructor-arg value="10" />
         <constructor-arg value="0" />
         <property name="articleDAO" ref="articleDAO" />
+        <property name="strategyFactory" ref="grabberType" />
     </bean>
 
     <bean id="grabberFactory" class="edu.sl.grabalyze.grabber.factory.GrabberFactory">
-        <property name="strategyFactory" ref="gazetaUaArticleFactory" />
+        <property name="strategies" ref="articleListFactory" />
     </bean>
 
     <!-- ********** PROCESSING *********** -->
@@ -84,8 +91,10 @@
         <property name="offset" value="0" />
     </bean>
 
+    <!-- ********** MAIN *********** -->
+
     <bean id="program" class="edu.sl.grabalyze.execution.ProgramExecutor">
-        <property name="factory" ref="processingFactory" />
+        <property name="factory" ref="grabberFactory" />
         <property name="threadCount" value="1" />
     </bean>
 
