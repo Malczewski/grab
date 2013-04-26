@@ -3,6 +3,7 @@ package edu.sl.grabalyze.grabber.strategy.gazetaua;
 import edu.sl.grabalyze.dao.ArticleDAO;
 import edu.sl.grabalyze.entity.Article;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
+import edu.sl.grabalyze.grabber.strategy.utils.Extractor;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -67,25 +68,25 @@ public class GazetaUaListStrategy implements GrabberStrategy {
 
         List<Article> result = new ArrayList<Article>();
         Extractor ex = new Extractor();
-        ex.index = 0;
+        ex.setIndex(0);
         while (true) {
-            ex.index = content.indexOf(LIST_ITEM, ex.index);
-            if (ex.index == -1)
+            ex.setIndex(content.indexOf(LIST_ITEM, ex.getIndex()));
+            if (ex.getIndex() == -1)
                 break;
 
             Article art = new Article();
 
             ex.setString("<a href=\"", "\">");
-            art.setUrl(HOST + extractValue(content, ex));
+            art.setUrl(HOST + ex.extractValue(content));
             art.setCategoryCode(art.getUrl().replaceAll(".*articles/", "").replaceAll("/.*", ""));
 
             art.setId(Long.valueOf(art.getUrl().substring(art.getUrl().lastIndexOf('/') + 1)));
 
             ex.setString("class=\"marked\">", "</a>");
-            art.setCategoryName(extractValue(content, ex));
+            art.setCategoryName(ex.extractValue(content));
 
             ex.setString(art.getId() + "\">", "</a>");
-            art.setTitle(extractValue(content, ex));
+            art.setTitle(ex.extractValue(content));
 
 
             art.setDate(dateFrom);
@@ -98,7 +99,8 @@ public class GazetaUaListStrategy implements GrabberStrategy {
 
     @Override
     public double getProgress() {
-        return 1.0 * (dateFrom.getTime() - startDate.getTime()) / (dateTo.getTime() - startDate.getTime());
+        return (1.0 * (dateFrom.getTime() - startDate.getTime()) + 1.0 * (page - 1) / pageCount * DAY)
+                / (dateTo.getTime() - startDate.getTime());
     }
 
     @Override
@@ -128,23 +130,5 @@ public class GazetaUaListStrategy implements GrabberStrategy {
 
     private String getUrl() {
         return String.format(NEWS_LINK, format.format(dateFrom), page++);
-    }
-
-    private String extractValue(String html, Extractor ex) {
-        int start = html.indexOf(ex.prefix, ex.index) + ex.prefix.length();
-        int end = html.indexOf(ex.suffix, start);
-        ex.index = end + ex.suffix.length();
-        return html.substring(start, end);
-    }
-
-    private class Extractor {
-        private String prefix, suffix;
-        private int index;
-
-        public void setString(String prefix, String suffix) {
-            this.prefix = prefix;
-            this.suffix = suffix;
-        }
-
     }
 }

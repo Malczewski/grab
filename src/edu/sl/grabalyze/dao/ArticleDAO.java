@@ -12,6 +12,8 @@ public interface ArticleDAO {
     
     void updateContent(long id, String text);
 
+    void remove(long id);
+
     List<Article> getArticles(int count, int offset);
     List<Article> getNotProcessedArticles(int count, int offset);
 }

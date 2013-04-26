@@ -39,6 +39,11 @@ public class ArticleDAOImpl extends AbstractDAO implements ArticleDAO {
     }
 
     @Override
+    public void remove(long id) {
+        getJdbcTemplate().update("DELETE FROM articles WHERE article_id = ?", id);
+    }
+
+    @Override
     public List<Article> getArticles(int count, int offset) {
         return getJdbcTemplate().query("SELECT article_id, url, title, category_code, category_name, content, doc_date FROM articles" +
         		" ORDER BY doc_date desc LIMIT ? OFFSET ?", new Object[] { count, offset }, new ArticleMapper());

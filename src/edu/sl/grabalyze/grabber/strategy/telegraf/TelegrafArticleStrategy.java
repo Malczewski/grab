@@ -2,6 +2,7 @@ package edu.sl.grabalyze.grabber.strategy.telegraf;
 
 import edu.sl.grabalyze.dao.ArticleDAO;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
+import edu.sl.grabalyze.grabber.strategy.utils.Extractor;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,29 +28,18 @@ public class TelegrafArticleStrategy implements GrabberStrategy {
 
     @Override
     public void processHtml(String html) {
-        int start = html.indexOf("article-text\">");
-        if (start == -1)
-            return;
-        start += "article-text\">".length();
-        int end = html.indexOf("<div class=\"clear\">", start);
-        String content = html.substring(start, end);
-        String clear = removeReadAlso(content);
-        String textOnly = removeTags(clear).trim();
+        Extractor ex = new Extractor();
+        ex.setString("<full-text>", "<p class=\"class-pohozhie-temi\">");
+        String content = ex.extractValue(html);
+        String textOnly = removeTags(content).trim();
 
-        articleDAO.updateContent(current, textOnly);
-    }
-
-    private String removeReadAlso(String html) {
-        String also = "ЧИТАЙТЕ ТАКОЖ";
-        int index = html.indexOf(also);
-        if (index != -1) {
-            return removeReadAlso(html.substring(0, index).concat(html.substring(html.indexOf("</a>", index), html.length())));
-        }
-        return html;
+        if (!textOnly.isEmpty())
+            articleDAO.updateContent(current, textOnly);
+        else articleDAO.remove(current);
     }
 
     private String removeTags(String html) {
-        return html.replaceAll("<[^>]*>", "").replaceAll("&nbsp;", "");
+        return html.replaceAll("<[^>]*>", "");//.replaceAll("\\s\\s+", " ");
     }
 
     @Override
