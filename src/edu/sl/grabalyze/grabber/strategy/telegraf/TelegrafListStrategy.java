@@ -17,7 +17,7 @@ public class TelegrafListStrategy implements GrabberStrategy {
 
     private static final String CONTENT_EXIST = "divh5";
     private static final String START_STRING = "titleBlockForNews";
-    private static final String END_STRING = "page-numbers current";
+    private static final String END_STRING = "categoryColRightList";
 
     private static final String LIST_ITEM = "categoryLatestNewsTextHeight";
 
@@ -60,7 +60,7 @@ public class TelegrafListStrategy implements GrabberStrategy {
                 Extractor extractor = new Extractor();
                 extractor.setString("Страница 1 из ", "</span>");
                 String countStr = extractor.extractValue(content);
-                pageCount = Integer.valueOf(countStr);
+                pageCount = countStr.isEmpty() ? 1 : Integer.valueOf(countStr);
             }
         }
 

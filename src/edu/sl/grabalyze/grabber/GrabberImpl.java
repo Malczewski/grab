@@ -4,6 +4,7 @@ import edu.sl.grabalyze.execution.LoadController;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -41,8 +42,11 @@ public class GrabberImpl implements Runnable {
                     ex.printStackTrace();
                     errors++;
                 }
+            } catch (FileNotFoundException fe) {
+                System.err.println("Error in " + urlInput);
+                strategy.processHtml("");
             } catch (Exception e) {
-                System.err.println("Error in :" + urlInput);
+                System.err.println("Error in " + urlInput);
                 System.err.println(e);
                 errors++;
                 try {
