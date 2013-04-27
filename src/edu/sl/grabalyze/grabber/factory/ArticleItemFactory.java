@@ -38,7 +38,7 @@ public class ArticleItemFactory extends GrabberStrategies {
         }
         System.out.println("Got " + articles.size() + " articles for " + threads + " workers.");
         if (articles.size() > 0)
-            System.out.println("Dates:" + articles.get(0).getDate() + " to " + articles.get(articles.size()-1).getDate());
+            System.out.println("Dates:" + articles.get(articles.size()-1).getDate() + " to " + articles.get(0).getDate());
         return result;
     }
 }
