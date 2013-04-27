@@ -51,12 +51,13 @@
 
     <bean id="articleListFactory" class="edu.sl.grabalyze.grabber.factory.ArticleListFactory">
         <constructor-arg value="2012-01-01" />
-        <constructor-arg value="2013-04-26" />
+        <constructor-arg value="2012-06-06" />
+        <property name="articleDAO" ref="articleDAO" />
         <property name="strategyFactory" ref="grabberType" />
     </bean>
 
     <bean id="articleItemFactory" class="edu.sl.grabalyze.grabber.factory.ArticleItemFactory">
-        <constructor-arg value="200" />
+        <constructor-arg value="20000" />
         <constructor-arg value="0" />
         <property name="articleDAO" ref="articleDAO" />
         <property name="strategyFactory" ref="grabberType" />
@@ -95,7 +96,7 @@
 
     <bean id="program" class="edu.sl.grabalyze.execution.ProgramExecutor">
         <property name="factory" ref="grabberFactory" />
-        <property name="threadCount" value="16" />
+        <property name="threadCount" value="2" />
     </bean>
 
 

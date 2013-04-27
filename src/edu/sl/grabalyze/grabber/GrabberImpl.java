@@ -37,16 +37,17 @@ public class GrabberImpl implements Runnable {
                     strategy.processHtml(html);
                     System.out.println("Grabber #" + id + " : " + df.format(strategy.getProgress() * 100) + "%");
                 } catch (Exception ex) {
-                    System.err.println("Error in " + urlInput);
+                    System.err.println("Grabber #" + id + " : Error in " + urlInput);
                     System.err.println(ex);
                     ex.printStackTrace();
                     errors++;
                 }
             } catch (FileNotFoundException fe) {
-                System.err.println("Error in " + urlInput);
+                System.err.println("Grabber #" + id + " : Error in " + urlInput);
                 strategy.processHtml("");
+                System.out.println("Grabber #" + id + " : " + df.format(strategy.getProgress() * 100) + "%");
             } catch (Exception e) {
-                System.err.println("Error in " + urlInput);
+                System.err.println("Grabber #" + id + " : Error in " + urlInput);
                 System.err.println(e);
                 errors++;
                 try {
@@ -68,13 +69,16 @@ public class GrabberImpl implements Runnable {
         String result = "";
         url = new URL(urlInput);
         conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            rd = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), "UTF8"));
+        conn.setRequestMethod("GET");
+        rd = new BufferedReader(
+                new InputStreamReader(conn.getInputStream(), "UTF8"));
+        try {
             while ((line = rd.readLine()) != null) {
                 result += line;
             }
+        } finally {
             rd.close();
+        }
         
         return result;
     }

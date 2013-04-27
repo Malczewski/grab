@@ -22,20 +22,19 @@ public class GazetaUaListStrategy implements GrabberStrategy {
 
     private static final String LIST_ITEM = "list-preview";
 
-    private static final long DAY = 1000 * 60 * 60 * 24;
-
     private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
-    private Date dateTo, dateFrom, startDate;
+    private List<Date> dates;
+    private int current = 0;
+
     private int page;
     private int pageCount;
 
     private ArticleDAO articleDAO;
 
-    public GazetaUaListStrategy(Date from, Date to) {
-        this.dateFrom = new Date(from.getTime());
-        this.startDate = new Date(from.getTime());
-        this.dateTo = new Date(to.getTime());
+    public GazetaUaListStrategy(List<Date> dates) {
+        this.dates = dates;
+        current = 0;
         page = 1;
         pageCount = -1;
     }
@@ -48,7 +47,7 @@ public class GazetaUaListStrategy implements GrabberStrategy {
     public void processHtml(String html) {
         if (html == null || html.isEmpty() || !html.contains(CONTENT_EXIST)) {
             System.out.println("Page is empty");
-            dateFrom.setTime(dateFrom.getTime() + DAY);
+            current++;
             page = 1;
             pageCount = -1;
             return;
@@ -58,7 +57,7 @@ public class GazetaUaListStrategy implements GrabberStrategy {
             if (!html.contains(END_STRING)) {
                 pageCount = 1;
             } else {
-                content = html.substring(0, html.indexOf(String.format(CONTENT_END, getDate())));
+                content = html.substring(0, html.indexOf(String.format(CONTENT_END, dates.get(current))));
                 int last = content.lastIndexOf("</a>");
                 String countStr = content.substring(content.indexOf('>', last - 5) + 1, last);
                 pageCount = Integer.valueOf(countStr);
@@ -89,7 +88,7 @@ public class GazetaUaListStrategy implements GrabberStrategy {
             art.setTitle(ex.extractValue(content));
 
 
-            art.setDate(dateFrom);
+            art.setDate(dates.get(current));
 
             result.add(art);
         }
@@ -99,36 +98,27 @@ public class GazetaUaListStrategy implements GrabberStrategy {
 
     @Override
     public double getProgress() {
-        return (1.0 * (dateFrom.getTime() - startDate.getTime()) + 1.0 * (page - 1) / pageCount * DAY)
-                / (dateTo.getTime() - startDate.getTime());
+        return (1.0 * current + 1.0 * (page - 1) / pageCount) / dates.size();
     }
 
     @Override
     public String nextUrl() {
-        if (pageCount == -1)
-            return getUrl();
-        else {
-            if (page > pageCount) {
-                dateFrom.setTime(dateFrom.getTime() + DAY);
-                pageCount = -1;
-                page = 1;
-                return nextUrl();
-            } else {
-                return getUrl();
-            }
-        }
+        return getUrl();
     }
 
     @Override
     public boolean hasUrl() {
-        return dateFrom.before(dateTo) || dateFrom.equals(dateTo) && (page <= pageCount || pageCount == -1);
-    }
-
-    private String getDate() {
-        return format.format(dateFrom);
+        return current < (dates.size() - 1) ||
+                current == (dates.size() - 1) && (page <= pageCount || pageCount == -1);
     }
 
     private String getUrl() {
-        return String.format(NEWS_LINK, format.format(dateFrom), page++);
+        String result =  String.format(NEWS_LINK, format.format(dates.get(current)), page++);
+        if (page > pageCount && pageCount != -1) {
+            current++;
+            pageCount = -1;
+            page = 1;
+        }
+        return result;
     }
 }

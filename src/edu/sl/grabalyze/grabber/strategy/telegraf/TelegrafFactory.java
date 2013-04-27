@@ -5,6 +5,7 @@ import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategyFactory;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class TelegrafFactory extends GrabberStrategyFactory {
@@ -16,8 +17,8 @@ public class TelegrafFactory extends GrabberStrategyFactory {
     }
 
     @Override
-    public GrabberStrategy createListStrategy(Date from, Date to) {
-        TelegrafListStrategy result = new TelegrafListStrategy(from, to);
+    public GrabberStrategy createListStrategy(List<Date> dates) {
+        TelegrafListStrategy result = new TelegrafListStrategy(dates);
         result.setArticleDAO(articleDAO);
         return result;
     }

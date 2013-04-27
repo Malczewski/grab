@@ -1,6 +1,7 @@
 package edu.sl.grabalyze.grabber.factory;
 
 import edu.sl.grabalyze.dao.ArticleDAO;
+import edu.sl.grabalyze.grabber.factory.util.Distributor;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategyFactory;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
 
@@ -11,30 +12,30 @@ import java.util.List;
 public class ArticleListFactory extends GrabberStrategies {
 
     private Date dateTo, dateFrom;
-
-    private static final long DAY = 1000 * 60 * 60 * 24;
+    private ArticleDAO articleDAO;
 
     public ArticleListFactory(Date from, Date to) {
         this.dateFrom = new Date(from.getTime());
         this.dateTo = new Date(to.getTime());
     }
 
-    public List<GrabberStrategy> createStrategies(int count) {
+    public void setArticleDAO(ArticleDAO articleDAO) {
+        this.articleDAO = articleDAO;
+    }
+
+    public List<GrabberStrategy> createStrategies(int threads) {
         System.out.println("Requesting for list urls.");
-        List<GrabberStrategy> result = new ArrayList<>(count);
+        List<GrabberStrategy> result = new ArrayList<>(threads);
         if (dateFrom.after(dateTo)) {
             System.out.println("From date is after to date:" + dateFrom + " - " + dateTo);
             return result;
         }
-        Date from = new Date(dateFrom.getTime());
-        int days = (int) ((dateTo.getTime() - dateFrom.getTime()) / DAY / count);
-        while (!from.after(dateTo)) {
-            Date next = new Date(from.getTime() + days * DAY);
-            if (next.after(dateTo))
-                next.setTime(dateTo.getTime());
-            GrabberStrategy str = getStrategyFactory().createListStrategy(from, next);
+        List<Date> dates = articleDAO.getNotProcessedDays(dateFrom, dateTo);
+        System.out.println("Got " + dates.size() + " dates for " + threads + " workers.");
+        List<List<Date>> distr = new Distributor<Date>(dates).distribute(threads);
+        for (List<Date> list : distr) {
+            GrabberStrategy str = getStrategyFactory().createListStrategy(list);
             result.add(str);
-            from.setTime(next.getTime() + DAY);
         }
 
         return result;

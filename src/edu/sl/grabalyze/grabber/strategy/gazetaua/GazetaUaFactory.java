@@ -5,6 +5,7 @@ import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategyFactory;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class GazetaUaFactory extends GrabberStrategyFactory {
@@ -16,8 +17,8 @@ public class GazetaUaFactory extends GrabberStrategyFactory {
     }
 
     @Override
-    public GrabberStrategy createListStrategy(Date from, Date to) {
-        GazetaUaListStrategy result = new GazetaUaListStrategy(from, to);
+    public GrabberStrategy createListStrategy(List<Date> dates) {
+        GazetaUaListStrategy result = new GazetaUaListStrategy(dates);
         result.setArticleDAO(articleDAO);
         return result;
     }

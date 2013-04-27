@@ -3,15 +3,15 @@ package edu.sl.grabalyze.dao.impl;
 
 import edu.sl.grabalyze.dao.ArticleDAO;
 import edu.sl.grabalyze.entity.Article;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
-import javax.sql.DataSource;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class ArticleDAOImpl extends AbstractDAO implements ArticleDAO {
@@ -54,6 +54,26 @@ public class ArticleDAOImpl extends AbstractDAO implements ArticleDAO {
         return getJdbcTemplate().query("SELECT article_id, url, title, category_code, category_name, content, doc_date FROM articles" +
                 " WHERE content is null ORDER BY doc_date desc LIMIT ? OFFSET ?", new Object[] { count, offset },
                 new ArticleMapper());
+    }
+
+    @Override
+    public List<java.util.Date> getNotProcessedDays(java.util.Date start, java.util.Date end) {
+        final DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        return getJdbcTemplate().query("with recursive all_dates(curdate) as " +
+                "(select date '" + format.format(start) + "'" +
+                " union all" +
+                " select ad.curdate + 1" +
+                " from all_dates ad" +
+                " where ad.curdate < '" + format.format(end) + "'" + ")" +
+                " select distinct curdate " +
+                " from all_dates ad left outer join articles a on ad.curdate = a.doc_date" +
+                " where a.doc_date is null" +
+                " order by curdate", new RowMapper<java.util.Date>() {
+            @Override
+            public java.util.Date mapRow(ResultSet resultSet, int i) throws SQLException {
+                return resultSet.getDate(1);
+            }
+        });
     }
 
     private class ArticleMapper implements RowMapper<Article> {

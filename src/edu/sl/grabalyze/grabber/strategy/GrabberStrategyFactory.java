@@ -5,10 +5,11 @@ import edu.sl.grabalyze.grabber.strategy.gazetaua.GazetaUaFactory;
 import edu.sl.grabalyze.grabber.strategy.telegraf.TelegrafFactory;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public abstract class GrabberStrategyFactory {
-    public abstract GrabberStrategy createListStrategy(Date from, Date to);
+    public abstract GrabberStrategy createListStrategy(List<Date> dates);
     public abstract GrabberStrategy createItemStrategy(Map<Long, String> urls);
     
     public static GrabberStrategyFactory createFactory(String type, ArticleDAO articleDAO) {

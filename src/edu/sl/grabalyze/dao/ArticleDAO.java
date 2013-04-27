@@ -16,4 +16,6 @@ public interface ArticleDAO {
 
     List<Article> getArticles(int count, int offset);
     List<Article> getNotProcessedArticles(int count, int offset);
+    
+    List<Date> getNotProcessedDays(Date start, Date end);
 }

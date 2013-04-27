@@ -17,5 +17,5 @@ public abstract class GrabberStrategies {
         return this.strategyFactory;
     }
 
-    public abstract List<GrabberStrategy> createStrategies(int count);
+    public abstract List<GrabberStrategy> createStrategies(int threads);
 }

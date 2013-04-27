@@ -21,20 +21,19 @@ public class TelegrafListStrategy implements GrabberStrategy {
 
     private static final String LIST_ITEM = "categoryLatestNewsTextHeight";
 
-    private static final long DAY = 1000 * 60 * 60 * 24;
-
     private final SimpleDateFormat format = new SimpleDateFormat("yyyy/M/d");
 
-    private Date dateTo, dateFrom, startDate;
+    private List<Date> dates;
+    private int current;
+
     private int page;
     private int pageCount;
 
     private ArticleDAO articleDAO;
 
-    public TelegrafListStrategy(Date from, Date to) {
-        this.dateFrom = new Date(from.getTime());
-        this.startDate = new Date(from.getTime());
-        this.dateTo = new Date(to.getTime());
+    public TelegrafListStrategy(List<Date> dates) {
+        this.dates = dates;
+        current = 0;
         page = 1;
         pageCount = -1;
     }
@@ -47,7 +46,7 @@ public class TelegrafListStrategy implements GrabberStrategy {
     public void processHtml(String html) {
         if (html == null || html.isEmpty() || !html.contains(CONTENT_EXIST)) {
             System.out.println("Page is empty");
-            dateFrom.setTime(dateFrom.getTime() + DAY);
+            current++;
             page = 1;
             pageCount = -1;
             return;
@@ -86,7 +85,7 @@ public class TelegrafListStrategy implements GrabberStrategy {
             art.setCategoryCode(art.getUrl().replaceAll(HOST + "/", "")
                     .replaceAll("/" + art.getId() + ".*", ""));
 
-            art.setDate(dateFrom);
+            art.setDate(dates.get(current));
 
             result.add(art);
         }
@@ -96,8 +95,7 @@ public class TelegrafListStrategy implements GrabberStrategy {
 
     @Override
     public double getProgress() {
-        return (1.0 * (dateFrom.getTime() - startDate.getTime()) + 1.0 * (page - 1) / pageCount * DAY)
-                / (dateTo.getTime() - startDate.getTime() + DAY);
+        return (1.0 * current + 1.0 * (page - 1) / pageCount) / dates.size();
     }
 
     @Override
@@ -106,7 +104,7 @@ public class TelegrafListStrategy implements GrabberStrategy {
             return getUrl();
         else {
             if (page > pageCount) {
-                dateFrom.setTime(dateFrom.getTime() + DAY);
+                current++;
                 pageCount = -1;
                 page = 1;
                 return nextUrl();
@@ -118,10 +116,11 @@ public class TelegrafListStrategy implements GrabberStrategy {
 
     @Override
     public boolean hasUrl() {
-        return dateFrom.before(dateTo) || dateFrom.equals(dateTo) && (page <= pageCount || pageCount == -1);
+        return current < (dates.size() - 1) ||
+                current == (dates.size() - 1) && (page <= pageCount || pageCount == -1);
     }
 
     private String getUrl() {
-        return String.format(NEWS_LINK, format.format(dateFrom), page++);
+        return String.format(NEWS_LINK, format.format(dates.get(current)), page++);
     }
 }
