@@ -34,11 +34,15 @@ public class ProcessorImpl implements Runnable{
     }
 
     public void run() {
-        int count = 0;
+        int counter = 0, last = 0;
+        int size = articles.size();
         for (Article a : articles) {
-            if (count % 10 == 0)
-                System.out.println("Processor #" + id + " : " + df.format(100.0 * count++ / articles.size()) + "%");
             wordMapping.put(a.getId(), processor.processText(a.getText()));
+            counter++;
+            if ((counter * 100 / size) / 5 != last) {
+                last = (counter * 100 / size) / 5;
+                System.out.println("Processor #" + id + " : " + (counter * 100 / size) + "%");
+            }
         }
         System.out.println("Processor #" + id + " : done!");
     }

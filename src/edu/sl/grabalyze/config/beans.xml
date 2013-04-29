@@ -64,39 +64,32 @@
     </bean>
 
     <bean id="grabberFactory" class="edu.sl.grabalyze.grabber.factory.GrabberFactory">
-        <property name="strategies" ref="articleItemFactory" />
+        <property name="strategies" ref="articleListFactory" />
     </bean>
 
     <!-- ********** PROCESSING *********** -->
 
-    <bean id="russianProcessor" class="edu.sl.grabalyze.processing.TextProcessor">
-        <constructor-arg>
-            <bean class="edu.sl.grabalyze.processing.language.LanguageFactory" factory-method="createLanguage">
-                <constructor-arg value="ru" />
-            </bean>
-        </constructor-arg>
-    </bean>
-    <bean id="ukrainianProcessor" class="edu.sl.grabalyze.processing.TextProcessor">
-        <constructor-arg>
-            <bean class="edu.sl.grabalyze.processing.language.LanguageFactory" factory-method="createLanguage">
-                <constructor-arg value="uk" />
-            </bean>
-        </constructor-arg>
-    </bean>
-
     <bean id="processingFactory" class="edu.sl.grabalyze.processing.factory.ProcessingFactory">
         <property name="articleDAO" ref="articleDAO" />
         <property name="tokenDAO" ref="tokenDAO" />
-        <property name="textProcessor" ref="ukrainianProcessor" />
-        <property name="countPerWorker" value="1" />
-        <property name="offset" value="0" />
+        <property name="textProcessor">
+            <bean class="edu.sl.grabalyze.processing.TextProcessor">
+                <constructor-arg>
+                    <bean class="edu.sl.grabalyze.processing.language.LanguageFactory" factory-method="createLanguage">
+                        <constructor-arg value="ru" />
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="count" value="1000" />
+        <property name="offset" value="5000" />
     </bean>
 
     <!-- ********** MAIN *********** -->
 
     <bean id="program" class="edu.sl.grabalyze.execution.ProgramExecutor">
-        <property name="factory" ref="grabberFactory" />
-        <property name="threadCount" value="2" />
+        <property name="factory" ref="processingFactory" />
+        <property name="threadCount" value="1" />
     </bean>
 
 

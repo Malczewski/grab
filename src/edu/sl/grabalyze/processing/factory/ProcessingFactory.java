@@ -8,20 +8,21 @@ import edu.sl.grabalyze.dao.TokenDAO;
 import edu.sl.grabalyze.entity.Article;
 import edu.sl.grabalyze.execution.Callback;
 import edu.sl.grabalyze.execution.RunnableFactory;
+import edu.sl.grabalyze.grabber.factory.util.Distributor;
 import edu.sl.grabalyze.processing.PostProcessor;
 import edu.sl.grabalyze.processing.ProcessorImpl;
 import edu.sl.grabalyze.processing.TextProcessor;
 
 public class ProcessingFactory implements RunnableFactory {
 
-    private int countPerWorker;
+    private int count;
     private int offset;
     private ArticleDAO articleDAO;
     private TokenDAO tokenDAO;
     private TextProcessor textProcessor;
 
-    public void setCountPerWorker(int count) {
-        this.countPerWorker = count;
+    public void setCount(int count) {
+        this.count = count;
     }
 
     public void setOffset(int offset) {
@@ -41,22 +42,21 @@ public class ProcessingFactory implements RunnableFactory {
     }
 
     @Override
-    public List<Runnable> create(int count) {
-        List<Article> articles = MockList.createArticles();//articleDAO.getArticles(count * countPerWorker, offset);
+    public List<Runnable> create(int threads) {
+        //List<Article> articles = MockList.createArticles();
+        System.out.println("Requesting " + count + " articles(offset=" + offset + ") for " + threads + " workers.");
+        List<Article> articles = articleDAO.getArticles(count, offset);
+        System.out.println("Got " + articles.size() + " articles.");
 
-        List<Runnable> result = new ArrayList<Runnable>(count);
-        for (int i = 0; i < count; i++) {
+        List<Runnable> result = new ArrayList<Runnable>(threads);
+        List<List<Article>> lists = new Distributor<Article>(articles).distribute(threads);
+        int id = 1;
+        for (List<Article> list : lists) {
             ProcessorImpl proc = new ProcessorImpl();
             proc.setTextProcessor(textProcessor);
-            proc.setId(i + 1);
-            int start = i * countPerWorker;
-            int end = Math.min((i + 1) * countPerWorker, articles.size());
-            if (start >= articles.size())
-                break;
-            proc.setArticles(articles.subList(start, end));
+            proc.setId(id++);
+            proc.setArticles(list);
             result.add(proc);
-            if (end >= articles.size())
-                break;
         }
         
         return result;

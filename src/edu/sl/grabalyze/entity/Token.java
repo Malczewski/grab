@@ -26,6 +26,21 @@ public class Token {
     public void setWord(String word) {
         this.word = word;
     }
-    
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Token token = (Token) o;
+
+        if (!word.equals(token.word)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return word.hashCode();
+    }
 }
