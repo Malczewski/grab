@@ -5,11 +5,13 @@ import edu.sl.grabalyze.entity.Article;
 import edu.sl.grabalyze.grabber.factory.util.Distributor;
 import edu.sl.grabalyze.grabber.strategy.gazetaua.GazetaUaArticleStrategy;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
 public class ArticleItemFactory extends GrabberStrategies {
 
+    @Autowired
     private ArticleDAO articleDAO;
     private int count;
     private int offset;
@@ -17,10 +19,6 @@ public class ArticleItemFactory extends GrabberStrategies {
     public ArticleItemFactory(int count, int offset) {
         this.count = count;
         this.offset = offset;
-    }
-
-    public void setArticleDAO(ArticleDAO articleDAO) {
-        this.articleDAO = articleDAO;
     }
 
     public List<GrabberStrategy> createStrategies(int threads) {

@@ -9,17 +9,22 @@ import edu.sl.grabalyze.entity.Article;
 import edu.sl.grabalyze.execution.Callback;
 import edu.sl.grabalyze.execution.RunnableFactory;
 import edu.sl.grabalyze.grabber.factory.util.Distributor;
-import edu.sl.grabalyze.processing.PostProcessor;
+import edu.sl.grabalyze.processing.post.DatabasePostProcessor;
 import edu.sl.grabalyze.processing.ProcessorImpl;
 import edu.sl.grabalyze.processing.TextProcessor;
+import edu.sl.grabalyze.processing.post.PostProcessor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProcessingFactory implements RunnableFactory {
 
     private int count;
     private int offset;
+    @Autowired
     private ArticleDAO articleDAO;
+    @Autowired
     private TokenDAO tokenDAO;
     private TextProcessor textProcessor;
+    private PostProcessor postProcessor;
 
     public void setCount(int count) {
         this.count = count;
@@ -28,17 +33,13 @@ public class ProcessingFactory implements RunnableFactory {
     public void setOffset(int offset) {
         this.offset = offset;
     }
-
-    public void setArticleDAO(ArticleDAO dao) {
-        this.articleDAO = dao;
-    }
-    
-    public void setTokenDAO(TokenDAO dao) {
-        this.tokenDAO = dao;
-    }
     
     public void setTextProcessor(TextProcessor textProcessor) {
         this.textProcessor = textProcessor;
+    }
+
+    public void setPostProcessor(PostProcessor postProcessor) {
+        this.postProcessor = postProcessor;
     }
 
     @Override
@@ -64,7 +65,7 @@ public class ProcessingFactory implements RunnableFactory {
 
     @Override
     public Callback<List<Runnable>> createCallback() {
-        return new PostProcessor(tokenDAO);
+        return postProcessor;
     }
 
 }

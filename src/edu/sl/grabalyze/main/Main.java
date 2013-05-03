@@ -14,12 +14,6 @@ public class Main {
 
         ProgramExecutor executor = (ProgramExecutor) context.getBean("program");
         executor.execute();
-        /*ProgramExecutor executor = new ProgramExecutor();
-        executor.setThreadCount(1);
-        ProcessingFactory factory = new ProcessingFactory();
-        factory.setCountPerWorker(10);
-        factory.setTextProcessor(new TextProcessor(new UkrainianLanguage()));
-        executor.setFactory(factory);
-        executor.execute();   */
+
     }
 }

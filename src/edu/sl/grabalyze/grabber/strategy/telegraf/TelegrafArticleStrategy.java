@@ -2,7 +2,7 @@ package edu.sl.grabalyze.grabber.strategy.telegraf;
 
 import edu.sl.grabalyze.dao.ArticleDAO;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
-import edu.sl.grabalyze.grabber.strategy.utils.Extractor;
+import edu.sl.grabalyze.utils.Extractor;
 
 import java.util.HashMap;
 import java.util.Iterator;

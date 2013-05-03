@@ -2,8 +2,13 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+    <context:annotation-config/>
 
     <import resource="classpath:edu/sl/grabalyze/config/spring-database.xml"/>
 
@@ -12,10 +17,10 @@
 
         <constructor-arg>
             <bean class="java.text.SimpleDateFormat">
-                <constructor-arg value="yyyy-MM-dd" />
+                <constructor-arg value="yyyy-MM-dd"/>
             </bean>
         </constructor-arg>
-        <constructor-arg value="true" />
+        <constructor-arg value="true"/>
 
     </bean>
 
@@ -23,73 +28,80 @@
         <property name="customEditors">
             <map>
                 <entry key="java.util.Date">
-                    <ref local="dateEditor" />
+                    <ref local="dateEditor"/>
                 </entry>
             </map>
         </property>
     </bean>
-    
+
     <bean id="articleDAO" class="edu.sl.grabalyze.dao.impl.ArticleDAOImpl">
-        <property name="dataSource" ref="dataSource" />
+        <property name="dataSource" ref="dataSource"/>
     </bean>
 
     <bean id="tokenDAO" class="edu.sl.grabalyze.dao.impl.TokenDAOImpl">
-        <property name="dataSource" ref="dataSource" />
+        <property name="dataSource" ref="dataSource"/>
     </bean>
 
     <!-- ********** GRAB *********** -->
 
     <bean id="loadController" class="edu.sl.grabalyze.execution.LoadController" factory-method="get">
-        <property name="delay" value="200" />
+        <property name="delay" value="200"/>
     </bean>
 
     <bean id="grabberType" class="edu.sl.grabalyze.grabber.strategy.GrabberStrategyFactory"
           factory-method="createFactory">
-        <constructor-arg value="telegraf" />
-        <constructor-arg ref="articleDAO" />
+        <constructor-arg value="telegraf"/>
+        <constructor-arg ref="articleDAO"/>
     </bean>
 
     <bean id="articleListFactory" class="edu.sl.grabalyze.grabber.factory.ArticleListFactory">
-        <constructor-arg value="2012-01-01" />
-        <constructor-arg value="2012-06-06" />
-        <property name="articleDAO" ref="articleDAO" />
-        <property name="strategyFactory" ref="grabberType" />
+        <constructor-arg value="2012-01-01"/>
+        <constructor-arg value="2012-06-06"/>
+        <property name="strategyFactory" ref="grabberType"/>
     </bean>
 
     <bean id="articleItemFactory" class="edu.sl.grabalyze.grabber.factory.ArticleItemFactory">
-        <constructor-arg value="20000" />
-        <constructor-arg value="0" />
-        <property name="articleDAO" ref="articleDAO" />
-        <property name="strategyFactory" ref="grabberType" />
+        <constructor-arg value="20000"/>
+        <constructor-arg value="0"/>
+        <property name="strategyFactory" ref="grabberType"/>
     </bean>
 
     <bean id="grabberFactory" class="edu.sl.grabalyze.grabber.factory.GrabberFactory">
-        <property name="strategies" ref="articleListFactory" />
+        <property name="strategies" ref="articleListFactory"/>
     </bean>
 
     <!-- ********** PROCESSING *********** -->
 
     <bean id="processingFactory" class="edu.sl.grabalyze.processing.factory.ProcessingFactory">
-        <property name="articleDAO" ref="articleDAO" />
-        <property name="tokenDAO" ref="tokenDAO" />
         <property name="textProcessor">
             <bean class="edu.sl.grabalyze.processing.TextProcessor">
                 <constructor-arg>
                     <bean class="edu.sl.grabalyze.processing.language.LanguageFactory" factory-method="createLanguage">
-                        <constructor-arg value="ru" />
+                        <constructor-arg value="ru"/>
                     </bean>
                 </constructor-arg>
             </bean>
         </property>
-        <property name="count" value="1000" />
-        <property name="offset" value="5000" />
+        <property name="postProcessor" ref="filePostProcessor"/>
+        <property name="count" value="10000"/>
+        <property name="offset" value="0"/>
+    </bean>
+
+    <bean id="databasePostProcessor" class="edu.sl.grabalyze.processing.post.DatabasePostProcessor"/>
+
+    <bean id="filePostProcessor" class="edu.sl.grabalyze.processing.post.FilePostProcessor">
+        <property name="threshold" value="10"/>
+        <property name="dense" value="true"/>
+        <property name="trainSize" value="70"/>
+        <property name="filename" value="d:\\test"/>
+        <property name="seed" value="random"/>
     </bean>
 
     <!-- ********** MAIN *********** -->
 
     <bean id="program" class="edu.sl.grabalyze.execution.ProgramExecutor">
-        <property name="factory" ref="processingFactory" />
-        <property name="threadCount" value="1" />
+        <property name="factory" ref="processingFactory"/>
+        <property name="threadCount" value="1"/>
     </bean>
 
 

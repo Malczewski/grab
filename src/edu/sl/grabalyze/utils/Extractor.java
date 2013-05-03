@@ -1,4 +1,4 @@
-package edu.sl.grabalyze.grabber.strategy.utils;
+package edu.sl.grabalyze.utils;
 
 /**
  * User: Admin

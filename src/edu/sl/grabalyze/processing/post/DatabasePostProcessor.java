@@ -1,18 +1,19 @@
-package edu.sl.grabalyze.processing;
+package edu.sl.grabalyze.processing.post;
 
 import java.util.*;
 
 import edu.sl.grabalyze.dao.TokenDAO;
+import edu.sl.grabalyze.entity.Article;
 import edu.sl.grabalyze.entity.Token;
-import edu.sl.grabalyze.execution.Callback;
+import edu.sl.grabalyze.processing.ProcessorImpl;
+import edu.sl.grabalyze.utils.ProgressMonitor;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class PostProcessor implements Callback<List<Runnable>> {
-
+public class DatabasePostProcessor implements PostProcessor {
+    @Autowired
     private TokenDAO tokenDAO;
     
-    public PostProcessor(TokenDAO dao) {
-        this.tokenDAO = dao;
-    }
+    public DatabasePostProcessor() {}
     
     @Override
     public void onSuccess(List<Runnable> result) {
@@ -26,19 +27,18 @@ public class PostProcessor implements Callback<List<Runnable>> {
             tokenIds.put(t.getWord(), t.getId());
         }
         
-        Map<Long, Map<String, Integer>> total = new HashMap<>(1000);
+        Map<Article, Map<String, Integer>> total = new HashMap<>(1000);
         for (Runnable proc : result) {
              total.putAll(((ProcessorImpl)proc).getMappings());
         }
         
         List<Token> newTokens = new ArrayList<Token>();
-        Map<Long, Map<Long, Integer>> articles = new HashMap<>(total.size());
+        Map<Article, Map<Long, Integer>> articles = new HashMap<>(total.size());
         
-        int counter = 0, last = 0;
-        int size = total.size();
-        System.out.println("Start processing tokens(" + size + " articles):");
-        for (Long articleId : total.keySet()) {
-            Map<String, Integer> counts = total.get(articleId);
+        ProgressMonitor mon = new ProgressMonitor(total.size());
+        System.out.println("Start processing tokens(" + total.size() + " articles):");
+        for (Article article : total.keySet()) {
+            Map<String, Integer> counts = total.get(article);
             Map<Long, Integer> tokenCounts = new HashMap<Long, Integer>(counts.size());
             Long tokenId;
             for (Map.Entry<String, Integer> entry : counts.entrySet()) {
@@ -50,12 +50,8 @@ public class PostProcessor implements Callback<List<Runnable>> {
                 }
                 tokenCounts.put(tokenId, entry.getValue());
             }
-            articles.put(articleId, tokenCounts);
-            counter++;
-            if ((counter * 100 / size) / 5 != last) {
-                last = (counter * 100 / size) / 5;
-                System.out.println("Processed: " + (counter * 100 / size) + "%");
-            }
+            articles.put(article, tokenCounts);
+            mon.increment();
         }
         System.out.println("Creating " + newTokens.size() + " new tokens.");
         tokenDAO.batchInsert(newTokens);
@@ -64,15 +60,10 @@ public class PostProcessor implements Callback<List<Runnable>> {
         tokenDAO.clearArticleTokens(articles.keySet());
 
         System.out.println("Saving counts:");
-        counter = 0; last = 0;
-        size = articles.size();
-        for (Long articleId : articles.keySet()) {
-            tokenDAO.saveArticleTokens(articleId, articles.get(articleId));
-            counter++;
-            if ((counter * 100 / size) / 5 != last) {
-                last = (counter * 100 / size) / 5;
-                System.out.println("Processed: " + (counter * 100 / size) + "%");
-            }
+        mon = new ProgressMonitor(articles.size());
+        for (Article article : articles.keySet()) {
+            tokenDAO.saveArticleTokens(article.getId(), articles.get(article));
+            mon.increment();
         }
         System.out.println("Post processing finished.");
     }

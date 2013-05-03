@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.sl.grabalyze.dao.TokenDAO;
+import edu.sl.grabalyze.entity.Article;
 import edu.sl.grabalyze.entity.Token;
 import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -69,12 +70,12 @@ public class TokenDAOImpl extends AbstractDAO implements TokenDAO {
     }
 
     @Override
-    public void clearArticleTokens(Collection<Long> articleIds) {
+    public void clearArticleTokens(Collection<Article> articles) {
         getJdbcTemplate().batchUpdate("DELETE FROM article_tokens WHERE article_id = ?",
-                articleIds, 1000, new ParameterizedPreparedStatementSetter<Long>() {
+                articles, 1000, new ParameterizedPreparedStatementSetter<Article>() {
             @Override
-            public void setValues(PreparedStatement preparedStatement, Long aLong) throws SQLException {
-                preparedStatement.setLong(1, aLong);
+            public void setValues(PreparedStatement preparedStatement, Article article) throws SQLException {
+                preparedStatement.setLong(1, article.getId());
             }
         });
     }

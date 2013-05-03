@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.sl.grabalyze.entity.Article;
+import edu.sl.grabalyze.utils.ProgressMonitor;
 
 public class ProcessorImpl implements Runnable{
 
@@ -13,7 +14,7 @@ public class ProcessorImpl implements Runnable{
     private TextProcessor processor;
     private int id;
     
-    private Map<Long, Map<String,Integer>> wordMapping = new HashMap<Long, Map<String,Integer>>(1000);
+    private Map<Article, Map<String,Integer>> wordMapping = new HashMap<Article, Map<String,Integer>>(1000);
 
     private final DecimalFormat df = new DecimalFormat("#.##");
 
@@ -29,20 +30,15 @@ public class ProcessorImpl implements Runnable{
         this.id = id;
     }
     
-    public Map<Long, Map<String,Integer>> getMappings() {
+    public Map<Article, Map<String,Integer>> getMappings() {
         return wordMapping;
     }
 
     public void run() {
-        int counter = 0, last = 0;
-        int size = articles.size();
+        ProgressMonitor mon = new ProgressMonitor(articles.size(), "Processor #" + id + " : ");
         for (Article a : articles) {
-            wordMapping.put(a.getId(), processor.processText(a.getText()));
-            counter++;
-            if ((counter * 100 / size) / 5 != last) {
-                last = (counter * 100 / size) / 5;
-                System.out.println("Processor #" + id + " : " + (counter * 100 / size) + "%");
-            }
+            wordMapping.put(a, processor.processText(a.getText()));
+            mon.increment();
         }
         System.out.println("Processor #" + id + " : done!");
     }

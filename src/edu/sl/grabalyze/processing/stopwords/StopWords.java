@@ -25,7 +25,7 @@ public class StopWords {
     }
     
     public boolean isStopWord(String word) {
-        if (word.length() <= 1)
+        if (word.length() <= 1 || word.length() >= 100)
             return true;
         boolean digits = true;
         for (int i = 0; i < word.length(); i++)

@@ -4,6 +4,7 @@ import edu.sl.grabalyze.dao.ArticleDAO;
 import edu.sl.grabalyze.grabber.factory.util.Distributor;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategyFactory;
 import edu.sl.grabalyze.grabber.strategy.GrabberStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,15 +13,12 @@ import java.util.List;
 public class ArticleListFactory extends GrabberStrategies {
 
     private Date dateTo, dateFrom;
+    @Autowired
     private ArticleDAO articleDAO;
 
     public ArticleListFactory(Date from, Date to) {
         this.dateFrom = new Date(from.getTime());
         this.dateTo = new Date(to.getTime());
-    }
-
-    public void setArticleDAO(ArticleDAO articleDAO) {
-        this.articleDAO = articleDAO;
     }
 
     public List<GrabberStrategy> createStrategies(int threads) {
