@@ -83,17 +83,18 @@
             </bean>
         </property>
         <property name="postProcessor" ref="filePostProcessor"/>
-        <property name="count" value="10000"/>
+        <property name="count" value="1000"/>
         <property name="offset" value="0"/>
     </bean>
 
     <bean id="databasePostProcessor" class="edu.sl.grabalyze.processing.post.DatabasePostProcessor"/>
 
     <bean id="filePostProcessor" class="edu.sl.grabalyze.processing.post.FilePostProcessor">
-        <property name="threshold" value="10"/>
-        <property name="dense" value="true"/>
+        <property name="minThreshold" value="10"/>
+        <property name="maxThreshold" value="999999"/>
+        <property name="c45format" value="true"/>
         <property name="trainSize" value="70"/>
-        <property name="filename" value="d:\\test"/>
+        <property name="filename" value="d:\\matlab_data"/>
         <property name="seed" value="random"/>
     </bean>
 

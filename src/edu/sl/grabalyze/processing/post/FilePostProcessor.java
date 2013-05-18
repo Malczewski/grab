@@ -1,9 +1,6 @@
 package edu.sl.grabalyze.processing.post;
 
-import edu.sl.grabalyze.dao.TokenDAO;
 import edu.sl.grabalyze.entity.Article;
-import edu.sl.grabalyze.entity.Token;
-import edu.sl.grabalyze.execution.Callback;
 import edu.sl.grabalyze.processing.ProcessorImpl;
 import edu.sl.grabalyze.utils.ProgressMonitor;
 
@@ -18,9 +15,11 @@ public class FilePostProcessor implements PostProcessor {
     private static final String TEST = "test";
     private static final String CATEGORIES = "categories";
     private static final String WORDS = "words";
+    private static final String NAMES = "names";
     
-    private int threshold;
-    private boolean dense;
+    private int minThreshold = 0;
+    private int maxThreshold = Integer.MAX_VALUE;
+    private boolean c45format;
     private int trainSize;
     private String seed;
     private String filename;
@@ -28,12 +27,16 @@ public class FilePostProcessor implements PostProcessor {
     public FilePostProcessor() {
     }
     
-    public void setThreshold(int threshold) {
-        this.threshold = threshold;
+    public void setMinThreshold(int threshold) {
+        this.minThreshold = threshold;
+    }
+
+    public void setMaxThreshold(int threshold) {
+        this.maxThreshold = threshold;
     }
     
-    public void setDense(boolean dense) {
-        this.dense = dense;
+    public void setC45format(boolean c45format) {
+        this.c45format = c45format;
     }
 
     public void setTrainSize(int trainSize) {
@@ -84,7 +87,8 @@ public class FilePostProcessor implements PostProcessor {
             for (Map.Entry<String, Integer> entry : counts.entrySet()) {
                 tokenId = tokenIds.get(entry.getKey());
                 if (tokenId == null) {
-                    if (tokenTotalCounts.get(entry.getKey()) < threshold) {
+                    int cnt = tokenTotalCounts.get(entry.getKey());
+                    if (cnt < minThreshold || cnt > maxThreshold) {
                         skipped++;
                         continue;
                     }
@@ -99,8 +103,7 @@ public class FilePostProcessor implements PostProcessor {
 
         System.out.println("Saving counts.");
         try {
-            saveTokens(tokenIds);
-            saveToFile(articles, tokenIds.size());
+            saveToFile(articles, tokenIds, tokenIds.size());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -110,11 +113,7 @@ public class FilePostProcessor implements PostProcessor {
             + "; active words: " + maxToken + "; skipped: " + skipped);
     }
     
-    private void saveTokens(HashMap<String, Integer> tokens) throws FileNotFoundException {
-        String[] words = new String[tokens.size()];
-        for (String s : tokens.keySet())
-            words[tokens.get(s) - 1] = s;
-        
+    private void saveTokens(String[] words) throws FileNotFoundException {
         PrintWriter writer = new PrintWriter(filename + "." + WORDS);
         for (int i = 0; i < words.length; i++)
             writer.println((i + 1) + "=" + words[i]);
@@ -123,6 +122,7 @@ public class FilePostProcessor implements PostProcessor {
     }
 
     private void saveCategories(Map<Integer, List<Article>> categoryArticles) throws FileNotFoundException {
+        System.out.println("Saving " + categoryArticles.size() + " categories.");
         PrintWriter writer = new PrintWriter(filename + "." + CATEGORIES);
         for (int i = 0; i < categoryArticles.size(); i++) {
             List<Article> list = categoryArticles.get(Integer.valueOf(i));
@@ -131,9 +131,25 @@ public class FilePostProcessor implements PostProcessor {
         writer.flush();
         writer.close();
     }
+    
+    /*private void saveNamesFile(String[] words, Map<Integer,
+            List<Article>> categoryArticles) throws FileNotFoundException {
+        System.out.println("Saving " + categoryArticles.size() + " categories.");
+        PrintWriter writer = new PrintWriter(filename + "." + NAMES);
+        for (int i = 0; i < categoryArticles.size(); i++) {
+            List<Article> list = categoryArticles.get(Integer.valueOf(i));
+            writer.print(list.get(0).getCategoryName() + (i == (categoryArticles.size() - 1) ? "" : ","));
+        }
+        writer.println();
+        for (int i = 0; i < words.length; i++)
+            writer.println((i + 1) + ": discrete300");
+        writer.flush();
+        writer.close();
+    }*/
 
-    private void saveToFile(Map<Article, Map<Integer, Integer>> articles, int tokenCount) throws FileNotFoundException {
-        
+    private void saveToFile(Map<Article, Map<Integer, Integer>> articles,
+                            Map<String, Integer> tokenIds,
+                            int tokenCount) throws FileNotFoundException {
         Map<String, Integer> categoryIds = new HashMap<>();
         Map<Integer, List<Article>> categoryArticles = new HashMap<>();
         int currId = 0;
@@ -146,12 +162,27 @@ public class FilePostProcessor implements PostProcessor {
             }
             categoryArticles.get(id).add(a);
         }
-        saveCategories(categoryArticles);
+        
+        String[] words = new String[tokenIds.size()];
+        for (String s : tokenIds.keySet())
+            words[tokenIds.get(s) - 1] = s;
 
-        System.out.println("Saving " + categoryArticles.size() + " categories.");
         PrintWriter train = new PrintWriter(filename + "." + TRAIN);
         PrintWriter test = new PrintWriter(filename + "." + TEST);
         Random rand = new Random(seed.hashCode());
+
+        //if (!c45format) {
+            saveTokens(words);
+            saveCategories(categoryArticles);
+        //} else {
+            //saveNamesFile(words, categoryArticles);
+            /*for (int i = 0; i < words.length; i++) {
+                train.print(words[i] + ',');
+                test.print(words[i] + ',');
+            }
+            train.println("class");
+            test.println("class");     */
+        //}
 
         ProgressMonitor monitor = new ProgressMonitor(articles.size());
         for (Integer id : categoryArticles.keySet()) {
@@ -161,13 +192,14 @@ public class FilePostProcessor implements PostProcessor {
             int trainCount = trainSize * list.size() / 100;
             for (Article a : list) {
                 PrintWriter writer = (counter++ < trainCount) ? train : test;
-                writer.print(categoryIds.get(a.getCategoryName()));
+                if (!c45format)
+                    writer.print(categoryIds.get(a.getCategoryName()));
                 Map<Integer, Integer> counts = articles.get(a);
                 for (int i = 1; i <= tokenCount; i++) {
                     Integer count = counts.get(Integer.valueOf(i));
-                    if (dense) { // all values, with zeros 
-                        writer.print(' ');
+                    if (c45format) { // all values, with zeros 
                         writer.print(count == null ? 0 : count);
+                        writer.print(',');
                     } else {   // sparse format, only non-zero values
                         if (count != null) {
                             writer.print(' ');
@@ -175,6 +207,8 @@ public class FilePostProcessor implements PostProcessor {
                         }
                     }
                 }
+                if (c45format)
+                    writer.print(categoryIds.get(a.getCategoryName()));
                 writer.println();
                 monitor.increment();
             }
@@ -184,4 +218,5 @@ public class FilePostProcessor implements PostProcessor {
         train.close();
         test.close();
     }
+    
 }
