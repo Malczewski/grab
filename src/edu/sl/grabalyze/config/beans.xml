@@ -42,6 +42,10 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
+    <bean id="fileArticleDAO" class="edu.sl.grabalyze.dao.impl.FileArticleDAOImpl">
+        <property name="filename" value="d:\\text.dat"/>
+    </bean>
+
     <!-- ********** GRAB *********** -->
 
     <bean id="loadController" class="edu.sl.grabalyze.execution.LoadController" factory-method="get">
@@ -82,20 +86,27 @@
                 </constructor-arg>
             </bean>
         </property>
-        <property name="postProcessor" ref="filePostProcessor"/>
-        <property name="count" value="1000"/>
+        <property name="articleDAO" ref="articleDAO" />
+        <property name="postProcessor" ref="text2file"/>
+        <property name="count" value="10000"/>
         <property name="offset" value="0"/>
     </bean>
 
     <bean id="databasePostProcessor" class="edu.sl.grabalyze.processing.post.DatabasePostProcessor"/>
 
-    <bean id="filePostProcessor" class="edu.sl.grabalyze.processing.post.FilePostProcessor">
-        <property name="minThreshold" value="10"/>
+    <bean id="text2data" class="edu.sl.grabalyze.processing.post.FilePostProcessor">
+        <property name="minThreshold" value="1"/>
         <property name="maxThreshold" value="999999"/>
-        <property name="c45format" value="true"/>
+        <property name="c45format" value="false"/>
         <property name="trainSize" value="70"/>
-        <property name="filename" value="d:\\matlab_data"/>
+        <property name="filename" value="D:\\test"/>
         <property name="seed" value="random"/>
+        <property name="dataOnly" value="true" />
+        <property name="oneClass" value="false" />
+    </bean>
+
+    <bean id="text2file" class="edu.sl.grabalyze.processing.post.TextToFilePostProcessor">
+        <property name="filename" value="D:\\text.dat"/>
     </bean>
 
     <!-- ********** MAIN *********** -->

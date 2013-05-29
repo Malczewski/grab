@@ -14,8 +14,8 @@ create table tokens (
 create index on tokens(word);
 
 create table article_tokens (
-    article_id integer references articles(article_id),
-    token_id integer references tokens(token_id),
+    article_id integer references articles(article_id) on delete cascade,
+    token_id integer references tokens(token_id) on delete cascade,
     token_count integer,
     primary key (article_id, token_id));
 create index on article_tokens(article_id);

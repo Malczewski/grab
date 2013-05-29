@@ -23,6 +23,9 @@ public class FilePostProcessor implements PostProcessor {
     private int trainSize;
     private String seed;
     private String filename;
+
+    private boolean dataOnly;
+    private boolean oneClass;
     
     public FilePostProcessor() {
     }
@@ -37,6 +40,14 @@ public class FilePostProcessor implements PostProcessor {
     
     public void setC45format(boolean c45format) {
         this.c45format = c45format;
+    }
+
+    public void setDataOnly(boolean dataOnly) {
+        this.dataOnly = dataOnly;
+    }
+
+    public void setOneClass(boolean oneClass) {
+        this.oneClass = oneClass;
     }
 
     public void setTrainSize(int trainSize) {
@@ -167,13 +178,13 @@ public class FilePostProcessor implements PostProcessor {
         for (String s : tokenIds.keySet())
             words[tokenIds.get(s) - 1] = s;
 
-        PrintWriter train = new PrintWriter(filename + "." + TRAIN);
-        PrintWriter test = new PrintWriter(filename + "." + TEST);
         Random rand = new Random(seed.hashCode());
 
         //if (!c45format) {
+        if (!dataOnly) {
             saveTokens(words);
             saveCategories(categoryArticles);
+        }
         //} else {
             //saveNamesFile(words, categoryArticles);
             /*for (int i = 0; i < words.length; i++) {
@@ -184,16 +195,30 @@ public class FilePostProcessor implements PostProcessor {
             test.println("class");     */
         //}
 
+        PrintWriter train = null, test = null;
+        if (!oneClass) {
+            train = new PrintWriter(filename + "." + TRAIN);
+            test = new PrintWriter(filename + "." + TEST);
+        }
+            
         ProgressMonitor monitor = new ProgressMonitor(articles.size());
         for (Integer id : categoryArticles.keySet()) {
+
             List<Article> list = new ArrayList<>(categoryArticles.get(id));
+            String catName = list.get(0).getCategoryName();
+            if (oneClass) {
+                train = new PrintWriter(filename + "_" + catName + "." + TRAIN);
+                test = new PrintWriter(filename + "_" + catName + "." + TEST);
+            }
+            String name = list.get(0).getCategoryName();
+            
             Collections.shuffle(list, rand);
             int counter = 0;
             int trainCount = trainSize * list.size() / 100;
             for (Article a : list) {
                 PrintWriter writer = (counter++ < trainCount) ? train : test;
                 if (!c45format)
-                    writer.print(categoryIds.get(a.getCategoryName()));
+                    writer.print(oneClass ? 1 : id);
                 Map<Integer, Integer> counts = articles.get(a);
                 for (int i = 1; i <= tokenCount; i++) {
                     Integer count = counts.get(Integer.valueOf(i));
@@ -208,15 +233,51 @@ public class FilePostProcessor implements PostProcessor {
                     }
                 }
                 if (c45format)
-                    writer.print(categoryIds.get(a.getCategoryName()));
+                    writer.print(oneClass ? 1 : id);
                 writer.println();
                 monitor.increment();
             }
+            if (oneClass) {
+                List<Article> others = new ArrayList<>(articles.keySet());
+                counter = 0;
+                trainCount = trainSize * (others.size() - list.size()) / 100;
+                Collections.shuffle(others, rand);
+                for (Article a : others) {
+                    if (a.getCategoryName().equals(catName))
+                        continue;
+                    PrintWriter writer = (counter++ < trainCount) ? train : test;
+                    if (!c45format)
+                        writer.print(2);
+                    Map<Integer, Integer> counts = articles.get(a);
+                    for (int i = 1; i <= tokenCount; i++) {
+                        Integer count = counts.get(Integer.valueOf(i));
+                        if (c45format) { // all values, with zeros 
+                            writer.print(count == null ? 0 : count);
+                            writer.print(',');
+                        } else {   // sparse format, only non-zero values
+                            if (count != null) {
+                                writer.print(' ');
+                                writer.print(i + ":" + count);
+                            }
+                        }
+                    }
+                    if (c45format)
+                        writer.print(2);
+                    writer.println();
+                }
+                train.flush();
+                test.flush();
+                train.close();
+                test.close();
+            }
         }
-        train.flush();
-        test.flush();
-        train.close();
-        test.close();
+
+        if (!oneClass) {
+            train.flush();
+            test.flush();
+            train.close();
+            test.close();
+        }
     }
     
 }

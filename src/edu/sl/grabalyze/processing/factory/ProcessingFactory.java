@@ -19,10 +19,7 @@ public class ProcessingFactory implements RunnableFactory {
 
     private int count;
     private int offset;
-    @Autowired
     private ArticleDAO articleDAO;
-    @Autowired
-    private TokenDAO tokenDAO;
     private TextProcessor textProcessor;
     private PostProcessor postProcessor;
 
@@ -40,6 +37,10 @@ public class ProcessingFactory implements RunnableFactory {
 
     public void setPostProcessor(PostProcessor postProcessor) {
         this.postProcessor = postProcessor;
+    }
+    
+    public void setArticleDAO(ArticleDAO articleDAO) {
+        this.articleDAO = articleDAO;
     }
 
     @Override
